@@ -9,7 +9,7 @@ import time
 PROCESSES = []
 
 def camera(man):
-    cv2.namedWindow("preview")
+    # cv2.namedWindow("preview")
     print("[LOG] Starting camera")
     vc = cv2.VideoCapture(0)
 
@@ -20,9 +20,10 @@ def camera(man):
     
 
     while r:
-        cv2.imshow("preview", f)
+        # cv2.imshow("preview", f)
         cv2.waitKey(20)
         r, f = vc.read()
+        # f = cv2.resize(f, (640, 480))
         cv2.putText(f, 
                     str(time.time()), 
                     (100, 100), 
@@ -31,7 +32,7 @@ def camera(man):
                     (255,255,255),
                     2,
                     cv2.LINE_AA)
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 30]
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 65]
         man[0] = cv2.imencode('.jpg', f, encode_param)[1]
 
 # HTTP server handler
@@ -46,7 +47,12 @@ def socket(man):
     async def handler(websocket, path):
         print("[LOG] Socket opened")
         while True:
-            time.sleep(0.042) # 24 fps
+            # try:
+            #     x = await asyncio.wait_for(websocket.recv(), 0.010)
+            #     print(x)
+            # except asyncio.TimeoutError:
+            #     pass
+            time.sleep(0.033) # 30 fps
             await websocket.send(man[0].tobytes())
 
     print("[LOG] Starting socket handler")

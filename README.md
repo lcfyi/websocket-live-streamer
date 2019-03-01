@@ -2,9 +2,9 @@
 
 This is a proof-of-concept demo of using WebSockets to stream a video camera feed through WebSockets, so any browser can access it. 
 
-At the moment, it is very work-in-progress. The stream is coming in as the raw JPEG binary, which is then read as a blob to be displayedd as an image on the page.
+At the moment, it is very work-in-progress. The stream is coming in as the raw JPEG binary, which is then read as a blob that's loaded into an `Image()`, which is then drawn onto an HTML5 canvas. 
 
-The latency is about ~0.1s, but with relatively high CPU usage.
+The latency is about ~0.1s, but with relatively high CPU usage (NEW! Down from ~50% to ~20% CPU usage)
 
 To demo this, make sure you have `opencv-python` and `websockets` installed, and you have Python 3.6+.
 
