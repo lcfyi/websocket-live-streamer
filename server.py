@@ -9,16 +9,12 @@ import builtins
 # Keep track of our processes
 PROCESSES = []
 
-class logger:
-    def __init__(self):
-        self._print = print
-    
-    def print(self, message):
-        self._print("[LOG] " + str(dt.now()) + " - " + message)
+def log(message):
+    print("[LOG] " + str(dt.now()) + " - " + message)
 
 def camera(man):
     # cv2.namedWindow("preview")
-    print("Starting camera")
+    log("Starting camera")
     vc = cv2.VideoCapture(0)
 
     if vc.isOpened():
@@ -46,9 +42,9 @@ def camera(man):
 def server():
     class CustomLoggingHTTPRequestHandler(http.SimpleHTTPRequestHandler):
         def log_message(self, format, *args):
-            print("Request %s %s" % (self.client_address[0], format % args))
+            log("Request %s %s" % (self.client_address[0], format % args))
 
-    print("Server started")
+    log("Server started")
     server_address = ('0.0.0.0', 8000)
     httpd = http.HTTPServer(server_address, CustomLoggingHTTPRequestHandler)
     httpd.serve_forever()
@@ -56,7 +52,7 @@ def server():
 def socket(man):
     # Will handle our websocket connections
     async def handler(websocket, path):
-        print("Socket opened")
+        log("Socket opened")
         try:
             while True:
                 # try:
@@ -67,9 +63,9 @@ def socket(man):
                 await asyncio.sleep(0.033) # 30 fps
                 await websocket.send(man[0].tobytes())
         except websockets.exceptions.ConnectionClosed:
-            print("Socket closed")
+            log("Socket closed")
 
-    print("Starting socket handler")
+    log("Starting socket handler")
     # Create the awaitable object
     start_server = websockets.serve(ws_handler=handler, host='0.0.0.0', port=8585)
     # Start the server, add it to the event loop
@@ -84,7 +80,7 @@ def main():
     lst = manager.list()
     lst.append(None)
     # Replace our print function
-    builtins.print = logger().print
+    # builtins.print = logger().print
     # Host the page, creating the server
     http_server = multiprocessing.Process(target=server)
     # Set up our websocket handler
