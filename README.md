@@ -13,3 +13,9 @@ To demo this, make sure you have `opencv-python` and `websockets` installed, and
 1. Ensure you have the prerequisites, try `pip install -r requirements.txt`
 2. Run `python server.py`
 3. Visit `localhost:8000` to view the stream. A corresponding window will also be loaded with the current time.
+
+# Running this in a Raspberry Pi
+
+This currently works pretty well; I'm noticing ~0.4s latency between frames, but it runs at 30fps otherwise. 
+
+To try it out, make sure you have the `v4l2` drivers installed. Then, enable it with `sudo modprobe bcm2835-v4l2`. You can add it at boot by adding `bcm2835-v4l2` to `/etc/modules`. 
