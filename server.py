@@ -3,14 +3,22 @@ import asyncio
 import websockets
 import multiprocessing
 import cv2
-import time
+from datetime import datetime as dt
+import builtins
 
 # Keep track of our processes
 PROCESSES = []
 
+class logger:
+    def __init__(self):
+        self._print = print
+    
+    def print(self, message):
+        self._print("[LOG] " + str(dt.now()) + " - " + message)
+
 def camera(man):
     # cv2.namedWindow("preview")
-    print("[LOG] Starting camera")
+    print("Starting camera")
     vc = cv2.VideoCapture(0)
 
     if vc.isOpened():
@@ -18,44 +26,50 @@ def camera(man):
     else:
         r = False
     
-
     while r:
         # cv2.imshow("preview", f)
         cv2.waitKey(20)
         r, f = vc.read()
         # f = cv2.resize(f, (640, 480))
-        cv2.putText(f, 
-                    str(time.time()), 
-                    (100, 100), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 
-                    1, 
-                    (255,255,255),
-                    2,
-                    cv2.LINE_AA)
+        # cv2.putText(f, 
+        #             str(time.time()), 
+        #             (100, 100), 
+        #             cv2.FONT_HERSHEY_SIMPLEX, 
+        #             1, 
+        #             (255,255,255),
+        #             2,
+        #             cv2.LINE_AA)
         encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 65]
         man[0] = cv2.imencode('.jpg', f, encode_param)[1]
 
 # HTTP server handler
 def server():
-    print("[LOG] Server started")
+    class CustomLoggingHTTPRequestHandler(http.SimpleHTTPRequestHandler):
+        def log_message(self, format, *args):
+            print("Request %s %s" % (self.client_address[0], format % args))
+
+    print("Server started")
     server_address = ('0.0.0.0', 8000)
-    httpd = http.ThreadingHTTPServer(server_address, http.SimpleHTTPRequestHandler)
+    httpd = http.HTTPServer(server_address, CustomLoggingHTTPRequestHandler)
     httpd.serve_forever()
 
 def socket(man):
     # Will handle our websocket connections
     async def handler(websocket, path):
-        print("[LOG] Socket opened")
-        while True:
-            # try:
-            #     x = await asyncio.wait_for(websocket.recv(), 0.010)
-            #     print(x)
-            # except asyncio.TimeoutError:
-            #     pass
-            time.sleep(0.033) # 30 fps
-            await websocket.send(man[0].tobytes())
+        print("Socket opened")
+        try:
+            while True:
+                # try:
+                #     x = await asyncio.wait_for(websocket.recv(), 0.010)
+                #     print(x)
+                # except asyncio.TimeoutError:
+                #     pass
+                await asyncio.sleep(0.033) # 30 fps
+                await websocket.send(man[0].tobytes())
+        except websockets.exceptions.ConnectionClosed:
+            print("Socket closed")
 
-    print("[LOG] Starting socket handler")
+    print("Starting socket handler")
     # Create the awaitable object
     start_server = websockets.serve(ws_handler=handler, host='0.0.0.0', port=8585)
     # Start the server, add it to the event loop
@@ -69,6 +83,8 @@ def main():
     manager = multiprocessing.Manager()
     lst = manager.list()
     lst.append(None)
+    # Replace our print function
+    builtins.print = logger().print
     # Host the page, creating the server
     http_server = multiprocessing.Process(target=server)
     # Set up our websocket handler
@@ -90,4 +106,4 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         for p in PROCESSES:
-            p.kill()
+            p.terminate()
