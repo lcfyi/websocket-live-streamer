@@ -1,8 +1,10 @@
 import http.server as http
 import asyncio
 import websockets
+import socketserver
 import multiprocessing
 import cv2
+import sys
 from datetime import datetime as dt
 import builtins
 
@@ -40,13 +42,14 @@ def camera(man):
 
 # HTTP server handler
 def server():
-    class CustomLoggingHTTPRequestHandler(http.SimpleHTTPRequestHandler):
-        def log_message(self, format, *args):
-            log("Request %s %s" % (self.client_address[0], format % args))
-
-    log("Server started")
     server_address = ('0.0.0.0', 8000)
-    httpd = http.HTTPServer(server_address, CustomLoggingHTTPRequestHandler)
+    if sys.version_info[1] < 7:
+        class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.HTTPServer):
+            pass
+        httpd = ThreadingHTTPServer(server_address, http.SimpleHTTPRequestHandler)
+    else:
+        httpd = http.ThreadingHTTPServer(server_address, http.SimpleHTTPRequestHandler)
+    log("Server started")
     httpd.serve_forever()
 
 def socket(man):
