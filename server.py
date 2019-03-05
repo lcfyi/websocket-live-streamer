@@ -4,9 +4,10 @@ import websockets
 import socketserver
 import multiprocessing
 import cv2
+import picamera
+import io
 import sys
 from datetime import datetime as dt
-import builtins
 
 # Keep track of our processes
 PROCESSES = []
@@ -17,17 +18,27 @@ def log(message):
 def camera(man):
     # cv2.namedWindow("preview")
     log("Starting camera")
-    vc = cv2.VideoCapture(0)
+    # vc = cv2.VideoCapture(0)
 
-    if vc.isOpened():
-        r, f = vc.read()
-    else:
-        r = False
-    
-    while r:
+    # if vc.isOpened():
+    #     r, f = vc.read()
+    # else:
+    #     r = False
+    import time
+    with picamera.PiCamera() as camera:
+        camera.resolution = (960, 720)
+        camera.framerate = 30
+        time.sleep(2)
+        stream = io.BytesIO()
+        for foo in camera.capture_continuous(stream, 'jpeg', True):
+            stream.seek(0)
+            man[0] = stream.read()
+            stream.seek(0)
+            stream.truncate()
+            
         # cv2.imshow("preview", f)
-        cv2.waitKey(20)
-        r, f = vc.read()
+        # cv2.waitKey(20)
+        # r, f = vc.read()
         # f = cv2.resize(f, (640, 480))
         # cv2.putText(f, 
         #             str(time.time()), 
@@ -37,8 +48,8 @@ def camera(man):
         #             (255,255,255),
         #             2,
         #             cv2.LINE_AA)
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 65]
-        man[0] = cv2.imencode('.jpg', f, encode_param)[1]
+        # encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 65]
+        # man[0] = cv2.imencode('.jpg', f, encode_param)[1]
 
 # HTTP server handler
 def server():
@@ -58,13 +69,8 @@ def socket(man):
         log("Socket opened")
         try:
             while True:
-                # try:
-                #     x = await asyncio.wait_for(websocket.recv(), 0.010)
-                #     print(x)
-                # except asyncio.TimeoutError:
-                #     pass
                 await asyncio.sleep(0.033) # 30 fps
-                await websocket.send(man[0].tobytes())
+                await websocket.send(man[0])
         except websockets.exceptions.ConnectionClosed:
             log("Socket closed")
 
@@ -82,8 +88,6 @@ def main():
     manager = multiprocessing.Manager()
     lst = manager.list()
     lst.append(None)
-    # Replace our print function
-    # builtins.print = logger().print
     # Host the page, creating the server
     http_server = multiprocessing.Process(target=server)
     # Set up our websocket handler
