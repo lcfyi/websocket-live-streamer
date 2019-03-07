@@ -4,8 +4,6 @@ import websockets
 import socketserver
 import multiprocessing
 import cv2
-import picamera
-import io
 import sys
 from datetime import datetime as dt
 
