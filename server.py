@@ -16,40 +16,20 @@ def log(message):
     print("[LOG] " + str(dt.now()) + " - " + message)
 
 def camera(man):
-    # cv2.namedWindow("preview")
     log("Starting camera")
-    # vc = cv2.VideoCapture(0)
+    vc = cv2.VideoCapture(0)
 
-    # if vc.isOpened():
-    #     r, f = vc.read()
-    # else:
-    #     r = False
-    import time
-    with picamera.PiCamera() as camera:
-        camera.resolution = (960, 720)
-        camera.framerate = 30
-        time.sleep(2)
-        stream = io.BytesIO()
-        for foo in camera.capture_continuous(stream, 'jpeg', True):
-            stream.seek(0)
-            man[0] = stream.read()
-            stream.seek(0)
-            stream.truncate()
-            
-        # cv2.imshow("preview", f)
-        # cv2.waitKey(20)
-        # r, f = vc.read()
-        # f = cv2.resize(f, (640, 480))
-        # cv2.putText(f, 
-        #             str(time.time()), 
-        #             (100, 100), 
-        #             cv2.FONT_HERSHEY_SIMPLEX, 
-        #             1, 
-        #             (255,255,255),
-        #             2,
-        #             cv2.LINE_AA)
-        # encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 65]
-        # man[0] = cv2.imencode('.jpg', f, encode_param)[1]
+    if vc.isOpened():
+        r, f = vc.read()
+    else:
+        r = False
+
+    while r:
+        cv2.waitKey(20)
+        r, f = vc.read()
+        f = cv2.resize(f, (640, 480))
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 65]
+        man[0] = cv2.imencode('.jpg', f, encode_param)[1]
 
 # HTTP server handler
 def server():

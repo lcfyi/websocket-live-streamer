@@ -13,30 +13,4 @@ openSocket = () => {
             ctx.drawImage(image, 0, 0, msg.width, msg.height);
         });
     });
-    // setupPointer()
 }
-
-// setupPointer = () => {
-//     let msg = document.getElementById("msg");
-//     msg.requestPointerLock = msg.requestPointerLock;
-//     document.exitPointerLock = document.exitPointerLock;
-//     msg.addEventListener("click", () => {
-//         msg.requestPointerLock();
-//     });
-//     document.addEventListener('pointerlockchange', () => {
-//         if (document.pointerLockElement === msg) {
-//           console.log('The pointer lock status is now locked');
-//           document.addEventListener("mousemove", updatePosition, false);
-//         } else {
-//           console.log('The pointer lock status is now unlocked');
-//           document.removeEventListener("mousemove", updatePosition, false);
-//         }
-//     }, false);
-// }
-
-// updatePosition = (e) => {
-//     console.log(e.movementX);
-//     console.log(e.movementY);
-//     socket.send(e.movementX);
-//     socket.send(e.movementY);
-// }
