@@ -48,7 +48,7 @@ def socket(man):
         try:
             while True:
                 await asyncio.sleep(0.033) # 30 fps
-                await websocket.send(man[0])
+                await websocket.send(man[0].tobytes())
         except websockets.exceptions.ConnectionClosed:
             log("Socket closed")
 
